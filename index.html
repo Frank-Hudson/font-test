@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <link rel="shortcut icon" href="icon.svg" type="image/x-icon" />
+
+        <style>
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: sans-serif;
+                background: linear-gradient(
+                    to right,
+                    rgb(240, 248, 255) 30%,
+                    rgb(166, 179, 190) 40%,
+                    rgb(240, 248, 255) 30%
+                );
+                padding: 0;
+                margin: 0;
+                height: 100%;
+            }
+
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+                margin: auto;
+                text-align: center;
+            }
+
+            p {
+                z-index: 2;
+            }
+
+            .watermark {
+                opacity: 0.25;
+                position: absolute;
+                z-index: 1;
+                width: 20%;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -o-user-select: none;
+                user-select: none;
+                pointer-events: none;
+            }
+
+            .contents {
+                background-color: white;
+                padding: 20%;
+                padding-top: 50px;
+                margin-left: 20%;
+                width: 60%;
+                height: 100%;
+            }
+
+            .footer {
+                background-color: white;
+                padding: 3%;
+                margin-left: 20%;
+                width: 60%;
+            }
+
+            .callout {
+                --bg: #bbbbbb78;
+
+                background-color: var(--bg);
+                border-radius: 4px;
+                padding: 5px;
+
+                .title {
+                    font-size: larger;
+                    font-weight: bold;
+                }
+
+                .info {
+                    --bg: #7777ff78;
+                }
+            }
+
+            .yes {
+                color: rgb(0, 200, 0);
+            }
+
+            .no {
+                color: rgb(200, 0, 0);
+            }
+        </style>
+
+        <script
+            src="https://kit.fontawesome.com/a6b42c51ae.js"
+            crossorigin="anonymous"
+        ></script>
+
+        <title>Font Test</title>
+    </head>
+    <body>
+        <div id="contents" class="contents">
+            <h1>Font Test</h1>
+
+            <br /><br />
+        </div>
+
+        <div class="footer">
+            <h3>FYI</h3>
+
+            <h2>NO COPYRIGHT</h2>
+        </div>
+    </body>
+
+    <script type="module">
+        const fonts = await fetch("./fonts.json")
+            .then((response) => response.json())
+            .then((data) => data);
+
+        const contents = document.getElementById("contents");
+
+        const WATERMARK_INDEX = 12;
+
+        const ALNUM =
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+        const CalloutType = Object.freeze({
+            note: "note", // base type
+            abstract: "abstract", // base type
+            summary: "abstract",
+            tldr: "abstract",
+            info: "info", // base type
+            todo: "todo", // base type
+            tip: "tip", // base type
+            hint: "tip",
+            important: "tip",
+            success: "success", // base type
+            check: "success",
+            done: "success",
+            question: "question", // base type
+            help: "question",
+            faq: "question",
+            warn: "warning",
+            warning: "warning", // base type
+            caution: "warning",
+            attention: "warning",
+            fail: "failure",
+            failure: "failure", // base type
+            missing: "failure",
+            err: "error",
+            error: "error", // base type
+            danger: "error",
+            bug: "bug", // base type
+            example: "example", // base type
+            quote: "quote", // base type
+            cite: "quote",
+        });
+
+        function FaIcon(icon, colour) {
+            return { icon: icon, colour: colour };
+        }
+
+        const CALLOUT_TYPE_FA_ICONS = new Map([
+            [CalloutType.note, FaIcon("fa-solid fa-pen", "#7777ff")],
+            [CalloutType.info, FaIcon("fa-solid fa-circle-info", "#7777ff")],
+        ]);
+
+        /// Helped by ChatGPT
+        function isFontInstalled_rough(fontName, testText) {
+            const canvas = document.createElement("canvas");
+            const context = canvas.getContext("2d");
+
+            const testSize = 72;
+
+            const baseFont = "monospace";
+            const testFont = `${fontName},${baseFont}`;
+
+            context.font = `${testSize}px ${baseFont}`;
+            const baseWidth = context.measureText(testText).width;
+
+            context.font = `${testSize}px ${testFont}`;
+            const testWidth = context.measureText(testText).width;
+
+            return baseWidth !== testWidth;
+        }
+
+        const boolRepresentation = (boolValue, fontFamily = "sans-serif") =>
+            `<span class="${
+                boolValue ? "yes" : "no"
+            }" style="margin-right: 5px;">${boolValue ? "✔" : "✘"}</span>` +
+            `<span style="font-family: '${fontFamily}'; margin-left: 5px;">${fontFamily}</span>`;
+
+        const callout = (type, content) =>
+            `<div class="callout ${type}">
+                <div class="title"><i class="${
+                    CALLOUT_TYPE_FA_ICONS.get(type).icon
+                } fa-2xs" style="color: ${
+                CALLOUT_TYPE_FA_ICONS.get(type).colour
+            };"></i> ${type}</div>
+                <div class="content">${content}</div>
+            </div>`;
+
+        fonts.forEach((font, index) => {
+            let doesExist = isFontInstalled_rough(font, ALNUM);
+
+            contents.innerHTML += `<p>${boolRepresentation(
+                doesExist,
+                font
+            )}</p>${
+                index % WATERMARK_INDEX === 0
+                    ? `<picture width="100" class="watermark" style="left: ${
+                          index % (WATERMARK_INDEX * 3) === 0
+                              ? 20
+                              : index % (WATERMARK_INDEX * 2) === 0
+                              ? 60
+                              : 40
+                      }%;" index="${index}"><source srcset="icon.svg" /><img src="icon.svg" alt="Page icon" /></picture>`
+                    : ""
+            }`;
+        });
+
+        contents.innerHTML += callout(
+            CalloutType.info,
+            `Due to simplistic methods of determining whether each font is installed, your browser's 'monospace' font will be marked as not installed <br /> (${boolRepresentation(
+                false,
+                "&lt;monospace family&gt;"
+            )})`
+        );
+    </script>
+</html>
