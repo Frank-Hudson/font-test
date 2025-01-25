@@ -119,9 +119,10 @@
     </body>
 
     <script type="module">
-        const fonts = await fetch("./fonts.json")
+        const fonts_unsorted = await fetch("./fonts.json")
             .then((response) => response.json())
             .then((data) => data);
+        const fonts = fonts_unsorted.sort();
 
         const contents = document.getElementById("contents");
 
